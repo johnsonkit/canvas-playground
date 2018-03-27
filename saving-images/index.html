@@ -8,38 +8,124 @@
     <style>
         body {
             margin: 0;
+            font-family: Arial;
+            font-size: 16px;
+        }
+        canvas {
+            display: block;
+        }
+        label {
+            display: inline-block;
+            margin-bottom: 1rem; 
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: #000;
+            padding: .35rem .6rem;
+            border: solid 1px #000;
+        }
+        a:active,
+        a:focus {
+            opacity: .65;
+        }
+        .wrapper {
+            display: flex;
+            border: dashed 3px #000;
+        }
+        .setting {
+            padding: 2rem;
         }
     </style>
 </head>
 <body>
-    <canvas id="c" width="500" height="500"></canvas>
+
+    <div class="wrapper">
+        <div class="output">
+            <canvas id="c" width="500" height="500"></canvas>
+        </div>
+        <div class="setting">
+            <h1>Download Canvas Image</h1>
+            <form>
+                <label>
+                    Update text
+                    <input type="text" id="inputText">
+                </label>
+            </form>
+        </div>
+    </div>
+    
     
     <script>
         const c = document.querySelector('#c');
         const ctx = c.getContext('2d');
         const cWidth = c.width;
         const cHeight = c.height;
-        
+        const settingEl = document.querySelector('.setting');
+        const inputText = document.querySelector('#inputText');
+
+        // create an HTML 'a' element
+        const aEl = document.createElement('a');
+        aEl.textContent = 'Download';
+        aEl.setAttribute('download', 'image-name');
+
+        // create an HTML 'img' element
         const img = new Image();
         img.src = './500x500.png';
 
         img.onload = function() {
             console.log('loaded image');
             
-            // draw an image to the canvas
-            ctx.drawImage(img, 0, 0, cWidth, cHeight);
-            
-            // get a data-URL representation from an image
-            const savedImage = c.toDataURL();
-            
-            // create an HTML 'a' element
-            const aEl = document.createElement('a');
-            aEl.href = savedImage;
-            aEl.textContent = 'Download';
-            aEl.setAttribute('download', 'image-name');
+            drawImage(ctx, img);
 
-            // append the 'a' element to the body
-            document.body.appendChild(aEl);
+            drawText(ctx, "Welcome!");
+            
+            // update the HTML 'a' element
+            aEl.href = getCanvasDataURL(c);
+
+            // append the 'a' element to the settingEl view
+            settingEl.appendChild(aEl);
+        }
+
+        inputText.addEventListener('keyup', handleInputText);
+
+        function handleInputText(e) {
+            
+            cleanCanvas();
+
+            drawImage(ctx, img);
+
+            drawText(ctx, this.value);
+
+            aEl.href = getCanvasDataURL(c);
+        }
+
+        // draw an image to the canvas
+        function drawImage(ctx, image) {
+            ctx.drawImage(image, 0, 0, cWidth, cHeight);
+        }
+        
+        // draw text on canvas
+        function drawText(ctx, inputText) {
+            ctx.font = '50px Arial';
+            ctx.textAlign = 'center';
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'red';
+            ctx.strokeText(inputText, cWidth/2, 100);
+
+            ctx.fillStyle = "white";
+            ctx.fillText(inputText, cWidth/2, 100);
+        }
+
+        function cleanCanvas() {
+            ctx.fillStyle = "#ccc";
+            ctx.clearRect(0 ,0 , cWidth, cHeight);
+        }
+        
+        // get a data-URL representation from the canvas
+        function getCanvasDataURL(canvas) {
+            return canvas.toDataURL();
         }
         
     </script>
