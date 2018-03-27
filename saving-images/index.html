@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Save Image</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="c" width="500" height="500"></canvas>
+    
+    <script>
+        const c = document.querySelector('#c');
+        const ctx = c.getContext('2d');
+        const cWidth = c.width;
+        const cHeight = c.height;
+        
+        const img = new Image();
+        img.src = './500x500.png';
+
+        img.onload = function() {
+            console.log('loaded image');
+            
+            // draw an image to the canvas
+            ctx.drawImage(img, 0, 0, cWidth, cHeight);
+            
+            // get a data-URL representation from an image
+            const savedImage = c.toDataURL();
+            
+            // create an HTML 'a' element
+            const aEl = document.createElement('a');
+            aEl.href = savedImage;
+            aEl.textContent = 'Download';
+            aEl.setAttribute('download', 'image-name');
+
+            // append the 'a' element to the body
+            document.body.appendChild(aEl);
+        }
+        
+    </script>
+</body>
+</html>
