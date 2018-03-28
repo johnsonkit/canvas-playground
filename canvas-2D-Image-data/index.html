@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvas 2D Image Data</title>
+</head>
+<body>
+    <h1>Canvas 2D Image Data</h1>
+
+    <canvas id="c" width="300" height="300"></canvas>
+    
+    <script>
+        const c = document.querySelector('#c');
+        const ctx = c.getContext('2d');
+        
+        let imageData = ctx.createImageData(c.width, c.height);
+
+        for (let i = 0; i < imageData.data.length; i+=4) {
+            
+            // change every 10th pixel to a solid green color
+            if (i%40 === 0) {
+                imageData.data[i+1] = 255;
+                imageData.data[i+3] = 255;
+            }
+
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+    </script>
+</body>
+</html>
