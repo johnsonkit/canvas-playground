@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Grayscale Conversion Algorithms</title>
+    <style>
+        .box p {
+            margin: 0;
+            color: gray;
+            font-style: italic;
+            text-align: center;
+        }
+        img {
+            width: 320px;
+            height: auto;
+        }
+        .box--wrapper {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grayscale Conversion Algorithms</h1>
+    
+    <p>Image Copyright by Instagram @brunoalf8</p>
+    <p>Algorithms reference from <a target="_blank" href="http://www.tannerhelland.com/3643/grayscale-image-algorithm-vb6/">http://www.tannerhelland.com/3643/grayscale-image-algorithm-vb6/</a></p>
+    
+    <div class="box--wrapper">
+        <div class="box">
+            <img src="./chow-chow.jpg" alt="Chow Chow">
+            <p>Original</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c1" width="320" height="320"></canvas>
+            <p>(r + g + b) / 3</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c2" width="320" height="320"></canvas>
+            <p>r * 0.3 + g * 0.59 + b * 0.11</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c3" width="320" height="320"></canvas>
+            <p>(Math.max(r, g, b) + Math.min(r, g, b)) / 2</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c4" width="320" height="320"></canvas>
+            <p>Math.max(r, g, b)</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c5" width="320" height="320"></canvas>
+            <p>g</p>
+        </div>
+
+        <div class="box">
+            <canvas id="c6" width="320" height="320"></canvas>
+            <p>Custom # of gray shades (black and white)</p>
+        </div>
+
+    </div>
+
+    <script>
+        const c1 = document.querySelector('#c1');
+        const c2 = document.querySelector('#c2');
+        const c3 = document.querySelector('#c3');
+        const c4 = document.querySelector('#c4');
+        const c5 = document.querySelector('#c5');
+        const c6 = document.querySelector('#c6');
+        const ctx1 = c1.getContext('2d');
+        const ctx2 = c2.getContext('2d');
+        const ctx3 = c3.getContext('2d');
+        const ctx4 = c4.getContext('2d');
+        const ctx5 = c5.getContext('2d');
+        const ctx6 = c6.getContext('2d');
+        let img = new Image();
+
+        img.src = './chow-chow.jpg';
+        img.onload = function() {
+            ctx1.drawImage(img, 0, 0, 320, 320);
+            ctx2.drawImage(img, 0, 0, 320, 320);
+            ctx3.drawImage(img, 0, 0, 320, 320);
+            ctx4.drawImage(img, 0, 0, 320, 320);
+            ctx5.drawImage(img, 0, 0, 320, 320);
+            ctx6.drawImage(img, 0, 0, 320, 320);
+            /*
+                getImageData() method:
+                return the data as below
+
+                {
+                    data: Uint8ClampedArray,
+                    width: 320,
+                    height: 320
+                }
+            */
+            let imgData1 = ctx1.getImageData(0, 0, c1.width, c1.height);
+            let imgData2 = ctx2.getImageData(0, 0, c2.width, c2.height);
+            let imgData3 = ctx3.getImageData(0, 0, c3.width, c3.height);
+            let imgData4 = ctx4.getImageData(0, 0, c4.width, c4.height);
+            let imgData5 = ctx5.getImageData(0, 0, c5.width, c5.height);
+            let imgData6 = ctx6.getImageData(0, 0, c6.width, c6.height);
+
+            function updateImageData(imageData, grayscaleFn, ctx) {
+
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const r = imageData.data[i];
+                    const g = imageData.data[i+1];
+                    const b = imageData.data[i+2];
+
+                    const gray = grayscaleFn(r, g, b);
+                    imageData.data[i] = gray;
+                    imageData.data[i+1] = gray;
+                    imageData.data[i+2] = gray;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+
+            updateImageData(imgData1, rgbaToGrayscale1, ctx1);
+            updateImageData(imgData2, rgbaToGrayscale2, ctx2);
+            updateImageData(imgData3, rgbaToGrayscale3, ctx3);
+            updateImageData(imgData4, rgbaToGrayscale4, ctx4);
+            updateImageData(imgData5, rgbaToGrayscale5, ctx5);
+            updateImageData(imgData6, rgbaToGrayscale6, ctx6);
+            
+        }
+
+        /*
+            Color-To-Grayscale Conversion Algorithms
+        */
+
+        /*
+            Method 1: ("Averaging")
+            easy to implement
+            poor of representing brightness
+        */
+        function rgbaToGrayscale1(r, g, b) {
+            return (r + g + b) / 3;
+        }
+
+        /*
+            Method 2: ("luma" or "luminance")
+            A common formula in image processors
+        */
+        function rgbaToGrayscale2(r, g, b) {
+            return (r * 0.3 + g * 0.59 + b * 0.11);
+        }
+
+        /*
+            Method 3: (Desaturation)
+            Desaturating an image by converting an RGB triplet to an HSL triplet, then forcing the saturation to zero.
+            flattest (least contrast) and darkest overall image
+        */
+        function rgbaToGrayscale3(r, g, b) {
+            return (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+        }
+
+        /*
+            Method 4: (Decomposition)
+            Maximum decomposition[brighter]: Math.max(r, g, b)
+            or
+            Minimum decomposition[darker]: Math.min(r, g, b)
+        */
+        function rgbaToGrayscale4(r, g, b) {
+            return Math.max(r, g, b);
+        }
+
+        /*
+             Method 5: (Single color channel)
+             Using a single color channel
+             the fastest computational method
+             green is better for the reasons mentioned in Method 2
+        */
+        function rgbaToGrayscale5(r, g, b) {
+            return g;
+        }
+
+        /*
+            Method 6: (Custom # of gray shades)
+        */
+        function rgbaToGrayscale6(r, g, b) {
+            /*
+                NumberOfShades: 2 - 256 [8 bit color channels]
+                2 results in a black-and-white image
+                256 gives you an image identical to Method #1 above
+            */
+            const NumberOfShades = 2;
+            const ConversionFactor = 255 / (NumberOfShades - 1);
+            const AverageValue = (r + g + b) / 3;
+            
+            return Math.floor((AverageValue / ConversionFactor) + 0.5) * ConversionFactor;
+        }
+        
+    </script>
+    
+</body>
+</html>
